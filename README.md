@@ -1,3 +1,78 @@
+# OS-Install
+
+# Ubuntu Installation Instructions
+
+## Overview
+
+These instructions explain how to install the latest version of Ubuntu from a flash drive and manually partition the drive.
+
+## Steps
+
+### 1. Download Ubuntu
+
+Download the ISO file for the latest version of Ubuntu from the website. Using a flashing tool to flash the ISO to the flash drive.
+
+### 2. Shut Down the Computer
+
+Shut down the computer completely.
+
+### 3. Insert the Drive
+
+Insert the hard drive or flash drive that contains the Ubuntu installer.
+
+### 4. Boot From the Drive
+
+Turn on the computer and press `F12` to open the boot menu.
+
+Choose the file or drive that contains the Ubuntu installer.
+
+When prompted, select:
+
+```text
+Try or Install Ubuntu
+```
+
+### 5. Check the Ubuntu Version
+
+Once Ubuntu starts, open the terminal and check that you are using the correct version.
+
+Run:
+
+```bash
+lsb_release -a
+```
+
+### 6. Continue the Installation
+
+Continue through the Ubuntu installer until you reach the partitioning section.
+
+Choose manual partitioning.
+
+### 7. Remove Old Partitions
+
+Click the minus button to remove older Ubuntu versions or any other partitions you no longer need from the drive.
+
+Be careful not to delete your Windows partition unless you intend to erase Windows.
+
+### 8. Create a New Partition
+
+Click the plus button to create a new partition in the `nvme0n1` section.
+
+Create a new Ubuntu partition in the unallocated space on the NVMe drive, such as `nvme0n1`. Make sure you are not deleting the Windows, EFI, or recovery partitions unless you intend to erase them. Leave enough space for Windows if you are dual-booting.
+
+### 9. Finish Installation
+
+Continue through the installer and complete the Ubuntu installation.
+
+Restart the computer when prompted.
+
+## Notes
+
+* Make sure important files are backed up before deleting or resizing partitions.
+* Double-check which partition belongs to Windows before making changes.
+* The drive name may look similar to `nvme0n1`, but it can vary depending on your computer.
+
+
 # Ubuntu Studio Audio Setup with Ansible
 
 This repo documents the exact setup used to control an Ubuntu Studio machine from a Mac using Ansible and install audio software.
