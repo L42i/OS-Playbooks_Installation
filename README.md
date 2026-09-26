@@ -93,50 +93,102 @@ SuperCollider
 IEM Plug-in Suite
 ```
 
-## Important Note About the IP Address
-
-The Ubuntu machine's IP address can change when it switches networks.
-
-For example, during setup the target IP was first:
-
-```text
-10.11.12.245
-```
-
-After sharing internet from the Mac, the target IP changed to:
-
-```text
-192.168.2.2
-```
-
-Before running Ansible, always check the current Ubuntu IP address on the Ubuntu machine:
-
+## Assign a Static IP Address to the Ubuntu Machine
+ 
+By default, the Ubuntu machine gets its IP address from DHCP, so the address can change when it switches networks. For example, during setup the target IP was first `10.11.12.245`, and after sharing internet from the Mac it changed to `192.168.2.2`.
+ 
+To avoid updating `inventory.ini` every time, assign a static IP on the Ubuntu machine.
+ 
+> These steps assume Ubuntu Desktop, which manages Wi-Fi with NetworkManager (`nmcli`).
+ 
+### 1. Find the connection name
+ 
+On the Ubuntu machine, run:
+ 
 ```bash
-ip addr
+nmcli connection show
 ```
-
-For Wi-Fi, use:
-
+ 
+Look for the connection using the Wi-Fi interface `wlp129s0f0`. The name is usually the Wi-Fi network name (SSID).
+ 
+Example:
+ 
+```
+NAME          UUID                                  TYPE  DEVICE
+MyMacNetwork  1a2b3c4d-....                         wifi  wlp129s0f0
+```
+ 
+### 2. Check the current gateway
+ 
+```bash
+ip route
+```
+ 
+Example output:
+ 
+```
+default via 192.168.2.1 dev wlp129s0f0
+```
+ 
+This shows the gateway is `192.168.2.1`, so the network is `192.168.2.x`.
+ 
+### 3. Set the static IP
+ 
+Choose an address on the same network that nothing else is using. A higher number such as `192.168.2.50` is less likely to clash with DHCP-assigned devices.
+ 
+```bash
+sudo nmcli connection modify "MyMacNetwork" \
+  ipv4.method manual \
+  ipv4.addresses 192.168.2.50/24 \
+  ipv4.gateway 192.168.2.1 \
+  ipv4.dns "192.168.2.1 8.8.8.8"
+```
+ 
+Replace `MyMacNetwork` with your connection name, and adjust the IP and gateway to match your network.
+ 
+### 4. Apply the change
+ 
+```bash
+sudo nmcli connection up "MyMacNetwork"
+```
+ 
+### 5. Verify
+ 
 ```bash
 ip addr show wlp129s0f0
 ```
-
-Look for the line that starts with `inet`.
-
-Example:
-
-```text
-inet 192.168.2.2/24
+ 
+Look for the line that starts with `inet`:
+ 
 ```
-
-That means the IP address is:
-
-```text
-192.168.2.2
+inet 192.168.2.50/24
 ```
-
-Update `inventory.ini` whenever this IP changes.
-
+ 
+Confirm the machine still has internet access:
+ 
+```bash
+ping -c 3 google.com
+```
+ 
+### 6. Update the inventory
+ 
+Set the target IP in `inventory.ini` to the static address:
+ 
+```
+192.168.2.50
+```
+ 
+This only needs to be done once.
+ 
+### Notes
+ 
+- The static IP is saved per connection. If the Ubuntu machine joins a **different** network, that network will still use DHCP unless you repeat these steps for it.
+- To switch back to DHCP:
+```bash
+  sudo nmcli connection modify "MyMacNetwork" \
+    ipv4.method auto ipv4.addresses "" ipv4.gateway "" ipv4.dns ""
+  sudo nmcli connection up "MyMacNetwork"
+```
 ## Repo Files
 
 The repo contains:
